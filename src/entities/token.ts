@@ -16,7 +16,6 @@ export class Token extends BaseCurrency {
 
   /**
    *
-   * @param chainId {@link BaseCurrency#chainId}
    * @param address The contract address on the chain on which this token lives
    * @param decimals {@link BaseCurrency#decimals}
    * @param symbol {@link BaseCurrency#symbol}

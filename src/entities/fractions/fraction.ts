@@ -1,9 +1,8 @@
 import JSBI from 'jsbi'
-import invariant from 'tiny-invariant'
 import _Decimal from 'decimal.js-light'
-import _Big, { RoundingMode } from 'big.js'
+import _Big from 'big.js'
 
-import { BigintIsh, Rounding } from '../../constants'
+import { BigintIsh } from '../../constants'
 
 
 export class Fraction {

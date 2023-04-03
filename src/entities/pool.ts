@@ -1,4 +1,4 @@
-import { BigintIsh} from '@uniswap/sdk-core'
+import {BigintIsh} from '../constants'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import {  FeeAmount, TICK_SPACINGS } from '../constants'
