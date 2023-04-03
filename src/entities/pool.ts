@@ -2,7 +2,7 @@ import {BigintIsh} from '../constants'
 import JSBI from 'jsbi'
 import invariant from 'tiny-invariant'
 import {  FeeAmount, TICK_SPACINGS } from '../constants'
-import { NEGATIVE_ONE, ONE, Q192, ZERO } from '../internalConstants'
+import { NEGATIVE_ONE, ONE, ZERO } from '../internalConstants'
 import { LiquidityMath } from '../utils/liquidityMath'
 import { SwapMath } from '../utils/swapMath'
 import { TickMath } from '../utils/tickMath'
@@ -11,6 +11,7 @@ import { Tick, TickConstructorArgs } from './tick'
 import { NoTickDataProvider, TickDataProvider } from './tickDataProvider'
 import { TickListDataProvider } from './tickListDataProvider'
 import { Token } from './token'
+import { equals, sortsBefore } from '../utils'
 
 interface StepComputations {
   sqrtPriceStartX96: JSBI
@@ -38,11 +39,6 @@ export class Pool {
   public readonly liquidity: JSBI
   public readonly tickCurrent: number
   public readonly tickDataProvider: TickDataProvider
-
-
-
-
-
   /**
    * Construct a pool
    * @param tokenA One of the tokens in the pool
@@ -72,7 +68,7 @@ export class Pool {
       'PRICE_BOUNDS'
     )
     // always create a copy of the list since we want the pool's tick list to be immutable
-    ;[this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+    ;[this.token0, this.token1] = sortsBefore(tokenA,tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
     this.fee = fee
     this.sqrtRatioX96 = JSBI.BigInt(sqrtRatioX96)
     this.liquidity = JSBI.BigInt(liquidity)
@@ -86,7 +82,7 @@ export class Pool {
    * @returns True if token is either token0 or token
    */
   public involvesToken(token: Token): boolean {
-    return token.equals(this.token0) || token.equals(this.token1)
+    return equals(token,this.token0) || equals(token, this.token1)
   }
 
   /**
@@ -101,7 +97,7 @@ export class Pool {
   ): Promise<CurrencyAmount<Token>> {
     invariant(this.involvesToken(inputAmount.currency), 'TOKEN')
 
-    const zeroForOne = inputAmount.currency.equals(this.token0)
+    const zeroForOne = equals(inputAmount.currency,this.token0)
 
     const { amountCalculated: outputAmount } = await this.swap(
       zeroForOne,
@@ -123,9 +119,9 @@ export class Pool {
     outputAmount: CurrencyAmount<Token>,
     sqrtPriceLimitX96?: JSBI
   ): Promise<CurrencyAmount<Token> > {
-    invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), 'TOKEN')
+    invariant(this.involvesToken(outputAmount.currency), 'TOKEN')
 
-    const zeroForOne = outputAmount.currency.equals(this.token1)
+    const zeroForOne = equals(outputAmount.currency,this.token1)
 
     const { amountCalculated:inputAmount } = await this.swap(
       zeroForOne,
